@@ -21,7 +21,7 @@
     # parsers.
     type: "invalid_demo_only"
 
-    # Name of the macro. Must be unique among all macros in the list (and 
+    # Name of the macro. Must be unique among all macros in the list (and
     # hopefully in the project).
     name: "TECH_MACRO_DEMO"
 
@@ -109,6 +109,18 @@
             # Polarity of the input port.
             # Valid values include "active high" and "active low".
             input port polarity: "active high"
+
+            # Mask granularity.
+            # The mask fields are optional as a group.
+            # e.g. 1 means bit-masked, 8 means byte-masked.
+            mask granularity: 1
+
+            # Mask port name.
+            mask port name: "MASK"
+
+            # Mask port polarity.
+            # Valid values include "active high" and "active low".
+            mask port polarity: "active high"
 
     # List of extra ports on the memory cell.
     # Currently, only "constant" is supported as a type.
