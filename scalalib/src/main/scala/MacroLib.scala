@@ -27,6 +27,7 @@ object MacroType {
 
 // "Base class" for macros
 abstract class Macro {
+  // Get rid of this field entirely, since type of macro is determined by subclass?
   def macroType: MacroType
   def name: String
 }
