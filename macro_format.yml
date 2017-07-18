@@ -51,6 +51,7 @@
 
     # Type of memory (number of ports and read/write).
     # Currently supports read-write ports only.
+    # Note: this is currently de facto optional.
     # TODO: define how to handle read-only and write-only ports.
     # TODO: decide if this is redundant relative to the ports array below.
     # For read-write ports:

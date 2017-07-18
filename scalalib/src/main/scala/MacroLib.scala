@@ -83,7 +83,7 @@ object SRAMMacro {
     }
     val family: String = json.get("family") match {
       case Some(x:JsString) => x.as[String]
-      case _ => return None
+      case _ => "" // optional
     }
     val ports: Seq[MacroPort] = json.get("ports") match {
       case Some(x:JsArray) => x.as[List[Map[String, JsValue]]] map { a => { val b = MacroPort.parseJSON(a, width, depth); if (b == None) { return None } else b.get } }
