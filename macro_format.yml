@@ -33,6 +33,7 @@
     # Vt (voltage threshold of the cell).
     # Examples of valid options include "lvt" for low Vt, "rvt" for regular Vt,
     # and "hvt" for high Vt.
+    # Note: this option is not strictly validated yet
     vt: hvt
 
 # Memory/SRAM cell description.
@@ -57,6 +58,8 @@
     family: "1rw"
 
     # An array of port specifications.
+    # There must be at least one port in an SRAM (doesn't make sense to have
+    # port-less memories).
     ports:
         -
             # Name of the address port.
@@ -90,7 +93,7 @@
 
             # Name of the chip enable pin.
             # This pin is optional.
-            chip enable port name: "REN"
+            chip enable port name: "CEN"
 
             # Polarity of the chip enable pin.
             # Valid values include "active high" and "active low".
