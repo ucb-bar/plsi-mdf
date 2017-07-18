@@ -234,20 +234,13 @@ case object ActiveHigh extends PortPolarity
 case object NegativeEdge extends PortPolarity
 case object PositiveEdge extends PortPolarity
 object PortPolarity {
-  implicit def toPortPolarity(s: String): PortPolarity = s match {
+  implicit def toPortPolarity(s: String): PortPolarity = (s: @unchecked) match {
     case "active low" => ActiveLow
     case "active high" => ActiveHigh
     case "negative edge" => NegativeEdge
     case "positive edge" => PositiveEdge
   }
-  implicit def toPortPolarity(s: Any): PortPolarity =
-  (s: @unchecked) match {
-    case "active low" => ActiveLow
-    case "active high" => ActiveHigh
-    case "negative edge" => NegativeEdge
-    case "positive edge" => PositiveEdge
-  }
-  implicit def toPortPolarity(s: Option[Any]): Option[PortPolarity] =
+  implicit def toPortPolarity(s: Option[String]): Option[PortPolarity] =
     s map toPortPolarity
 }
 
