@@ -2,6 +2,7 @@ package mdf.macrolib
 
 import java.io.File
 import play.api.libs.json._
+import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 
 // TODO: decide if we should always silently absorb errors
@@ -23,6 +24,15 @@ object MacroType {
       case _ => NoType
     }
   }
+
+  implicit def toString(t: MacroType): String = {
+    t match {
+      case SRAM => "sram"
+      case Filler => "filler cell"
+      case MetalFiller => "metal filler cell"
+      case _ => ""
+    }
+  }
 }
 
 // "Base class" for macros
@@ -36,6 +46,14 @@ abstract class Macro {
 case class FillerMacro(macroType: MacroType, name: String, vt: String) extends Macro {
   override def toString(): String = {
     s"FillerMacro(macroType=${macroType}, name=${name}, vt=${vt})"
+  }
+
+  def toJSON(): JsObject = {
+    JsObject(Seq(
+      "type" -> JsString(MacroType.toString(macroType)),
+      "name" -> Json.toJson(name),
+      "vt" -> Json.toJson(vt)
+    ))
   }
 }
 object FillerMacro {
@@ -66,7 +84,26 @@ case class SRAMMacro(macroType: MacroType, name: String,
   family: String,
   ports: Seq[MacroPort],
   extraPorts: Seq[MacroExtraPort]
-) extends Macro
+) extends Macro {
+  def toJSON(): JsObject = {
+    val output = new ListBuffer[(String, JsValue)]()
+    output.appendAll(Seq(
+      "type" -> JsString(MacroType.toString(macroType)),
+      "name" -> Json.toJson(name),
+      "width" -> Json.toJson(width),
+      "depth" -> Json.toJson(depth),
+      "ports" -> JsArray(ports map { _.toJSON })
+    ))
+    if (family != "") {
+      output.appendAll(Seq("family" -> Json.toJson(family)))
+    }
+    if (extraPorts.length > 0) {
+      output.appendAll(Seq("extra ports" -> JsArray(extraPorts map { _.toJSON })))
+    }
+
+    JsObject(output)
+  }
+}
 object SRAMMacro {
   def parseJSON(json:Map[String, JsValue]): Option[SRAMMacro] = {
     val name: String = json.get("name") match {
@@ -111,6 +148,13 @@ object MacroExtraPortType {
       case _ => None
     }
   }
+
+  implicit def toString(t: MacroExtraPortType): String = {
+    t match {
+      case Constant => "constant"
+      case _ => ""
+    }
+  }
 }
 
 // Extra port in SRAM
@@ -119,7 +163,16 @@ case class MacroExtraPort(
   width: Int,
   portType: MacroExtraPortType,
   value: BigInt
-)
+) {
+  def toJSON(): JsObject = {
+    JsObject(Seq(
+      "name" -> Json.toJson(name),
+      "width" -> Json.toJson(width),
+      "type" -> JsString(MacroExtraPortType.toString(portType)),
+      "value" -> JsNumber(BigDecimal(value))
+    ))
+  }
+}
 object MacroExtraPort {
   def parseJSON(json:Map[String, JsValue]): Option[MacroExtraPort] = {
     val name = json.get("name") match {
@@ -146,7 +199,14 @@ object MacroExtraPort {
 }
 
 // A named port that also has polarity.
-case class PolarizedPort(name: String, polarity: PortPolarity)
+case class PolarizedPort(name: String, polarity: PortPolarity) {
+  def toSeqMap(prefix: String): Seq[Tuple2[String, JsValue]] = {
+    Seq(
+      prefix + " port name" -> Json.toJson(name),
+      prefix + " port polarity" -> JsString(polarity)
+    )
+  }
+}
 object PolarizedPort {
   // Parse a pair of "<prefix> port name" and "<prefix> port polarity" keys into a
   // polarized port definition.
@@ -172,21 +232,45 @@ case class MacroPort(
   address: PolarizedPort,
   clock: PolarizedPort,
 
-  writeEnable: Option[PolarizedPort],
-  readEnable: Option[PolarizedPort],
-  chipEnable: Option[PolarizedPort],
+  writeEnable: Option[PolarizedPort] = None,
+  readEnable: Option[PolarizedPort] = None,
+  chipEnable: Option[PolarizedPort] = None,
 
-  output: Option[PolarizedPort],
-  input: Option[PolarizedPort],
+  output: Option[PolarizedPort] = None,
+  input: Option[PolarizedPort] = None,
 
-  maskPort: Option[PolarizedPort],
-  maskGran: Option[Int],
+  maskPort: Option[PolarizedPort] = None,
+  maskGran: Option[Int] = None,
 
   // For internal use only; these aren't port-specific.
   width: Int,
   depth: Int
   ) {
   val effectiveMaskGran = maskGran.getOrElse(width)
+
+  def toJSON(): JsObject = {
+    val keys: Seq[Tuple2[String, Option[Any]]] = Seq(
+      "address" -> Some(address),
+      "clock" -> Some(clock),
+      "write enable" -> writeEnable,
+      "read enable" -> readEnable,
+      "chip enable" -> chipEnable,
+
+      "output" -> output,
+      "input" -> input,
+
+      "mask" -> maskPort,
+      "mask granularity" -> maskGran
+    )
+    JsObject(keys.flatMap(k => {
+      val (key, value) = k
+      value match {
+        case Some(x:Int) => Seq(key -> JsNumber(x))
+        case Some(x:PolarizedPort) => x.toSeqMap(key)
+        case _ => List()
+      }
+    }))
+  }
 }
 object MacroPort {
   def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = {
@@ -242,6 +326,15 @@ object PortPolarity {
   }
   implicit def toPortPolarity(s: Option[String]): Option[PortPolarity] =
     s map toPortPolarity
+
+  implicit def toString(p: PortPolarity): String = {
+    p match {
+      case ActiveLow => "active low"
+      case ActiveHigh => "active high"
+      case NegativeEdge => "negative edge"
+      case PositiveEdge => "positive edge"
+    }
+  }
 }
 
 object Utils {
