@@ -83,7 +83,7 @@ case class SRAMMacro(macroType: MacroType, name: String,
   depth: Int,
   family: String,
   ports: Seq[MacroPort],
-  extraPorts: Seq[MacroExtraPort]
+  extraPorts: Seq[MacroExtraPort] = List()
 ) extends Macro {
   def toJSON(): JsObject = {
     val output = new ListBuffer[(String, JsValue)]()
