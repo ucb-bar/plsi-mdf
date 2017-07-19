@@ -40,6 +40,8 @@ abstract class Macro {
   // Get rid of this field entirely, since type of macro is determined by subclass?
   def macroType: MacroType
   def name: String
+
+  def toJSON(): JsObject
 }
 
 // Filler and metal filler
@@ -48,7 +50,7 @@ case class FillerMacro(macroType: MacroType, name: String, vt: String) extends M
     s"FillerMacro(macroType=${macroType}, name=${name}, vt=${vt})"
   }
 
-  def toJSON(): JsObject = {
+  override def toJSON(): JsObject = {
     JsObject(Seq(
       "type" -> JsString(MacroType.toString(macroType)),
       "name" -> Json.toJson(name),
@@ -85,7 +87,7 @@ case class SRAMMacro(macroType: MacroType, name: String,
   ports: Seq[MacroPort],
   extraPorts: Seq[MacroExtraPort] = List()
 ) extends Macro {
-  def toJSON(): JsObject = {
+  override def toJSON(): JsObject = {
     val output = new ListBuffer[(String, JsValue)]()
     output.appendAll(Seq(
       "type" -> JsString(MacroType.toString(macroType)),
@@ -370,6 +372,28 @@ object Utils {
       case None => None
       // Read file into string and parse
       case Some(p) => Utils.readMDFFromString(scala.io.Source.fromFile(p).mkString)
+    }
+  }
+
+  // Write a MDF file to a String.
+  def writeMDFToString(s: Seq[Macro]): String = {
+    Json.prettyPrint(JsArray(s map (_.toJSON)))
+  }
+
+  // Write a MDF file from a path.
+  // Returns true upon success.
+  def writeMDFToPath(path: Option[String], s: Seq[Macro]): Boolean = {
+    path match {
+      case None => false
+      // Read file into string and parse
+      case Some(p: String) => {
+        import java.io._
+        val pw = new PrintWriter(new File(p))
+        pw.write(writeMDFToString(s))
+        val error = pw.checkError
+        pw.close()
+        !error
+      }
     }
   }
 }
