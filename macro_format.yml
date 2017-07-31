@@ -61,6 +61,9 @@
     # An array of port specifications.
     # There must be at least one port in an SRAM (doesn't make sense to have
     # port-less memories).
+    # Note: at the moment, "port polarity" is de facto optional (inferred as
+    # "active high" / "positive edge"). This should probably change.
+    # TODO: fix this in PLSI
     ports:
         -
             # Name of the address port.

@@ -219,6 +219,8 @@ object PolarizedPort {
     }
     val polarity: Option[PortPolarity] = json.get(prefix + " port polarity") match {
       case Some(x:JsString) => Some(x.value)
+      // TODO: eliminate this hack once PLSI is fixed to always emit polarities
+      case None => Some(if (prefix == "clock") PositiveEdge else ActiveHigh)
       case _ => None
     }
 
