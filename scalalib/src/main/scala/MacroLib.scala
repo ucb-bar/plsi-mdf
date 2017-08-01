@@ -398,4 +398,26 @@ object Utils {
       }
     }
   }
+
+  // Write a macro file to a String.
+  def writeMacroToString(s: Macro): String = {
+    Json.prettyPrint(s.toJSON)
+  }
+
+  // Write a Macro file from a path.
+  // Returns true upon success.
+  def writeMacroToPath(path: Option[String], s: Macro): Boolean = {
+    path match {
+      case None => false
+      // Read file into string and parse
+      case Some(p: String) => {
+        import java.io._
+        val pw = new PrintWriter(new File(p))
+        pw.write(writeMacroToString(s))
+        val error = pw.checkError
+        pw.close()
+        !error
+      }
+    }
+  }
 }
