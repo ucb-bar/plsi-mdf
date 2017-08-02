@@ -12,7 +12,6 @@ import play.api.libs.json._
 trait HasAwesomeMemData {
   def getAwesomeMem() = {
     SRAMMacro(
-      macroType=SRAM,
       name="awesome_mem",
       width=32,
       depth=1024,
@@ -81,7 +80,7 @@ class FillerMacroOutput extends FlatSpec with Matchers {
     |   "vt": "lvt"
     | }
     |""".stripMargin
-    FillerMacro(Filler, "MY_FILLER_CELL", "lvt").toJSON shouldBe Json.parse(expected)
+    FillerMacro("MY_FILLER_CELL", "lvt").toJSON shouldBe Json.parse(expected)
   }
 
   "Valid metal macro" should "be generated" in {
@@ -92,7 +91,7 @@ class FillerMacroOutput extends FlatSpec with Matchers {
     |   "vt": "lvt"
     | }
     |""".stripMargin
-    FillerMacro(MetalFiller, "METAL_FILLER_CELL", "lvt").toJSON shouldBe Json.parse(expected)
+    MetalFillerMacro("METAL_FILLER_CELL", "lvt").toJSON shouldBe Json.parse(expected)
   }
 
   "Valid hvt macro" should "be generated" in {
@@ -103,7 +102,7 @@ class FillerMacroOutput extends FlatSpec with Matchers {
     |   "vt": "hvt"
     | }
     |""".stripMargin
-    FillerMacro(Filler, "HVT_CELL_PROP", "hvt").toJSON shouldBe Json.parse(expected)
+    FillerMacro("HVT_CELL_PROP", "hvt").toJSON shouldBe Json.parse(expected)
   }
 }
 
@@ -255,8 +254,8 @@ class SRAMMacroOutput extends FlatSpec with Matchers with HasAwesomeMemData {
 class InputOutput extends FlatSpec with Matchers with HasAwesomeMemData {
   "Read-write string" should "preserve data" in {
     val mdf = List(
-      FillerMacro(Filler, "MY_FILLER_CELL", "lvt"),
-      FillerMacro(MetalFiller, "METAL_GEAR_FILLER", "hvt"),
+      FillerMacro("MY_FILLER_CELL", "lvt"),
+      MetalFillerMacro("METAL_GEAR_FILLER", "hvt"),
       getAwesomeMem
     )
     Utils.readMDFFromString(Utils.writeMDFToString(mdf)) shouldBe Some(mdf)
@@ -267,8 +266,8 @@ class InputOutput extends FlatSpec with Matchers with HasAwesomeMemData {
 
   "Read-write file" should "preserve data" in {
     val mdf = List(
-      FillerMacro(Filler, "MY_FILLER_CELL", "lvt"),
-      FillerMacro(MetalFiller, "METAL_GEAR_FILLER", "hvt"),
+      FillerMacro("MY_FILLER_CELL", "lvt"),
+      MetalFillerMacro("METAL_GEAR_FILLER", "hvt"),
       getAwesomeMem
     )
     val filename = testDir + "/" + "mdf_read_write_test.json"

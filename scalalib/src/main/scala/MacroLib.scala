@@ -9,58 +9,39 @@ import scala.language.implicitConversions
 
 // See macro_format.yml for the format description.
 
-// Macro type
-sealed abstract class MacroType
-case object SRAM extends MacroType
-case object Filler extends MacroType
-case object MetalFiller extends MacroType
-case object NoType extends MacroType
-object MacroType {
-  implicit def toMacroType(s: Any): MacroType = {
-    s match {
-      case "sram" => SRAM
-      case "filler cell" => Filler
-      case "metal filler cell" => MetalFiller
-      case _ => NoType
-    }
-  }
-
-  implicit def toString(t: MacroType): String = {
-    t match {
-      case SRAM => "sram"
-      case Filler => "filler cell"
-      case MetalFiller => "metal filler cell"
-      case _ => ""
-    }
-  }
-}
-
 // "Base class" for macros
 abstract class Macro {
-  // Get rid of this field entirely, since type of macro is determined by subclass?
-  def macroType: MacroType
   def name: String
+
+  // Type of macro is determined by subclass
+  def typeStr: String
 
   def toJSON(): JsObject
 }
 
 // Filler and metal filler
-case class FillerMacro(macroType: MacroType, name: String, vt: String) extends Macro {
+abstract class FillerMacroBase(name: String, vt: String) extends Macro {
   override def toString(): String = {
-    s"FillerMacro(macroType=${macroType}, name=${name}, vt=${vt})"
+    s"${this.getClass.getSimpleName}(name=${name}, vt=${vt})"
   }
 
   override def toJSON(): JsObject = {
     JsObject(Seq(
-      "type" -> JsString(MacroType.toString(macroType)),
+      "type" -> JsString(typeStr),
       "name" -> Json.toJson(name),
       "vt" -> Json.toJson(vt)
     ))
   }
 }
-object FillerMacro {
-  def parseJSON(macroType: MacroType, json:Map[String, JsValue]): Option[FillerMacro] = {
-    require(macroType == Filler || macroType == MetalFiller)
+object FillerMacroBase {
+  def parseJSON(json:Map[String, JsValue]): Option[FillerMacroBase] = {
+    val typee: String = json.get("type") match {
+      case Some(x:JsString) => x.value match {
+        case "" => return None
+        case x => x
+      }
+      case _ => return None
+    }
     val name: String = json.get("name") match {
       case Some(x:JsString) => x.value match {
         case "" => return None
@@ -75,12 +56,24 @@ object FillerMacro {
       }
       case _ => return None
     }
-    Some(FillerMacro(macroType, name, vt))
+    typee match {
+      case "metal filler cell" => Some(MetalFillerMacro(name, vt))
+      case "filler cell" => Some(FillerMacro(name, vt))
+      case _ => None
+    }
   }
 }
 
+case class FillerMacro(name: String, vt: String) extends FillerMacroBase(name, vt) {
+  override def typeStr = "filler cell"
+}
+case class MetalFillerMacro(name: String, vt: String) extends FillerMacroBase(name, vt) {
+  override def typeStr = "metal filler cell"
+}
+
 // SRAM macro
-case class SRAMMacro(macroType: MacroType, name: String,
+case class SRAMMacro(
+  name: String,
   width: Int,
   depth: Int,
   family: String,
@@ -90,7 +83,7 @@ case class SRAMMacro(macroType: MacroType, name: String,
   override def toJSON(): JsObject = {
     val output = new ListBuffer[(String, JsValue)]()
     output.appendAll(Seq(
-      "type" -> JsString(MacroType.toString(macroType)),
+      "type" -> JsString("sram"),
       "name" -> Json.toJson(name),
       "width" -> Json.toJson(width),
       "depth" -> Json.toJson(depth),
@@ -105,6 +98,8 @@ case class SRAMMacro(macroType: MacroType, name: String,
 
     JsObject(output)
   }
+
+  override def typeStr = "sram"
 }
 object SRAMMacro {
   def parseJSON(json:Map[String, JsValue]): Option[SRAMMacro] = {
@@ -136,7 +131,7 @@ object SRAMMacro {
       case Some(x:JsArray) => x.as[List[Map[String, JsValue]]] map { a => { val b = MacroExtraPort.parseJSON(a); if (b == None) { return None } else b.get } }
       case _ => List()
     }
-    Some(SRAMMacro(SRAM, name, width, depth, family, ports, extraPorts))
+    Some(SRAMMacro(name, width, depth, family, ports, extraPorts))
   }
 }
 
@@ -353,12 +348,10 @@ object Utils {
             case Some(x:JsString) => x.as[String]
             case _ => return None // error, no type found
           }
-          val objType: MacroType = objTypeStr
-
-          objType match {
-            case Filler | MetalFiller => FillerMacro.parseJSON(objType, obj)
-            case SRAM => SRAMMacro.parseJSON(obj)
-            case NoType => None // skip unknown macro types
+          objTypeStr match {
+            case "filler cell" | "metal filler cell" => FillerMacroBase.parseJSON(obj)
+            case "sram" => SRAMMacro.parseJSON(obj)
+            case _ => None // skip unknown macro types
           }
         }
         // Remove all the Nones and convert back to Seq[Macro]

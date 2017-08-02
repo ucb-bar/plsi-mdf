@@ -14,24 +14,6 @@ object JSONUtils {
   }
 }
 
-// Tests for macro type
-class MacroTypeSpec extends FlatSpec with Matchers {
-  "Valid types" should "be detected" in {
-    MacroType.toMacroType("sram") shouldBe SRAM
-    MacroType.toMacroType("filler cell") shouldBe Filler
-    MacroType.toMacroType("metal filler cell") shouldBe MetalFiller
-  }
-
-  "Invalid types" should "be rejected" in {
-    MacroType.toMacroType("moo") shouldBe NoType
-    MacroType.toMacroType("bug") shouldBe NoType
-    MacroType.toMacroType("filler") shouldBe NoType
-    MacroType.toMacroType("cell") shouldBe NoType
-    MacroType.toMacroType("") shouldBe NoType
-    MacroType.toMacroType("!!!") shouldBe NoType
-  }
-}
-
 // Tests for filler macros
 class FillerMacroSpec extends FlatSpec with Matchers {
   "Valid lvt macros" should "be detected" in {
@@ -42,7 +24,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": "lvt"
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(Filler, m) shouldBe Some(FillerMacro(Filler, "MY_FILLER_CELL", "lvt"))
+    FillerMacroBase.parseJSON(m) shouldBe Some(FillerMacro("MY_FILLER_CELL", "lvt"))
   }
 
   "Valid metal macro" should "be detected" in {
@@ -53,7 +35,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": "lvt"
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(MetalFiller, m) shouldBe Some(FillerMacro(MetalFiller, "METAL_FILLER_CELL", "lvt"))
+    FillerMacroBase.parseJSON(m) shouldBe Some(MetalFillerMacro("METAL_FILLER_CELL", "lvt"))
   }
 
   "Valid hvt macros" should "be detected" in {
@@ -64,7 +46,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": "hvt"
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(Filler, m) shouldBe Some(FillerMacro(Filler, "HVT_CELL_PROP", "hvt"))
+    FillerMacroBase.parseJSON(m) shouldBe Some(FillerMacro("HVT_CELL_PROP", "hvt"))
   }
 
   "Empty name macros" should "be rejected" in {
@@ -75,7 +57,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": "hvt"
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(Filler, m) shouldBe None
+    FillerMacroBase.parseJSON(m) shouldBe None
   }
 
   "Empty vt macros" should "be rejected" in {
@@ -86,7 +68,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": ""
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(MetalFiller, m) shouldBe None
+    FillerMacroBase.parseJSON(m) shouldBe None
   }
 
   "Missing vt macros" should "be rejected" in {
@@ -96,7 +78,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "name": "DEAD_CELL"
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(MetalFiller, m) shouldBe None
+    FillerMacroBase.parseJSON(m) shouldBe None
   }
 
   "Missing name macros" should "be rejected" in {
@@ -106,7 +88,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
     |   "vt": ""
     | }
     |""".stripMargin).get
-    FillerMacro.parseJSON(Filler, m) shouldBe None
+    FillerMacroBase.parseJSON(m) shouldBe None
   }
 }
 
@@ -188,7 +170,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   ]
 }
     """).get
-    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro(SRAM, "SRAMS_R_US",
+    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro("SRAMS_R_US",
       width=2048,
       depth=4096,
       family="1rw",
@@ -211,7 +193,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   ]
 }
     """).get
-    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro(SRAM, "SRAMS_R_US",
+    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro("SRAMS_R_US",
       width=1234,
       depth=8888,
       family="1rw",
@@ -257,7 +239,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   ]
 }
     """).get
-    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro(SRAM, "SRAMS_R_US",
+    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro("SRAMS_R_US",
       width=64,
       depth=1024,
       family="2rw",
@@ -294,7 +276,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   ]
 }
     """).get
-    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro(SRAM, "GOT_EXTRA",
+    SRAMMacro.parseJSON(m) shouldBe Some(SRAMMacro("GOT_EXTRA",
       width=2048,
       depth=4096,
       family="1rw",
