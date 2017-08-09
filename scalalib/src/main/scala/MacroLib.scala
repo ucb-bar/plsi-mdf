@@ -270,6 +270,10 @@ case class MacroPort(
       }
     }))
   }
+
+  // Check that all port names are unique.
+  private val polarizedPorts = List(Some(address), Some(clock), writeEnable, readEnable, chipEnable, output, input, maskPort).flatten
+  assert (polarizedPorts.distinct.size == polarizedPorts.size, "All port names must be unique")
 }
 object MacroPort {
   def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = {
