@@ -297,6 +297,10 @@ object MacroPort {
       case _ => None
     }
 
+    if (maskPort.isDefined != maskGran.isDefined) {
+      return None
+    }
+
     Some(MacroPort(width=width, depth=depth,
       address=address.get,
       clock=clock.get,
