@@ -133,7 +133,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
       maskPort=Some(PolarizedPort(s"MASK_${postfix}", ActiveHigh)),
       maskGran=Some(1),
 
-      width=width, depth=depth
+      width=Some(width), depth=Some(depth)
     )
     (json, port)
   }
@@ -214,7 +214,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
       input=Some(PolarizedPort("IN_B", ActiveHigh)),
       maskPort=None,
       maskGran=None,
-      width=64, depth=1024)
+      width=Some(64), depth=Some(1024))
     val m = JSONUtils.readStringValueMap(s"""
 {
   "type": "sram",

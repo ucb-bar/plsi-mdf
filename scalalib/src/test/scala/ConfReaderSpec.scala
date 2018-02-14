@@ -13,7 +13,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
 
       output=Some(PolarizedPort(s"R${num}_data", ActiveHigh)),
 
-      width=width, depth=depth
+      width=Some(width), depth=Some(depth)
     )
   }
 
@@ -28,7 +28,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
       maskPort=if (maskGran.isDefined) Some(PolarizedPort(s"W${num}_mask", ActiveHigh)) else None,
       maskGran=maskGran,
 
-      width=184, depth=128
+      width=Some(184), depth=Some(128)
     )
   }
 
@@ -51,7 +51,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
           maskPort=Some(PolarizedPort("RW0_wmask", ActiveHigh)),
           maskGran=Some(23),
 
-          width=184, depth=128
+          width=Some(184), depth=Some(128)
         )
       ),
       extraPorts=List()

@@ -102,25 +102,29 @@ case class SRAMMacro(
   override def typeStr = "sram"
 }
 object SRAMMacro {
-  def parseJSON(json:Map[String, JsValue]): Option[SRAMMacro] = {
+  def parseJSON(json: Map[String, JsValue]): Option[SRAMMacro] = {
     val name: String = json.get("name") match {
-      case Some(x:JsString) => x.as[String]
+      case Some(x: JsString) => x.as[String]
       case _ => return None
     }
     val width: Int = json.get("width") match {
-      case Some(x:JsNumber) => x.value.intValue
+      case Some(x: JsNumber) => x.value.intValue
       case _ => return None
     }
     val depth: Int = json.get("depth") match {
-      case Some(x:JsNumber) => x.value.intValue
+      case Some(x: JsNumber) => x.value.intValue
       case _ => return None
     }
     val family: String = json.get("family") match {
-      case Some(x:JsString) => x.as[String]
+      case Some(x: JsString) => x.as[String]
       case _ => "" // optional
     }
     val ports: Seq[MacroPort] = json.get("ports") match {
-      case Some(x:JsArray) => x.as[List[Map[String, JsValue]]] map { a => { val b = MacroPort.parseJSON(a, width, depth); if (b == None) { return None } else b.get } }
+      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a =>
+        val b = MacroPort.parseJSON(a, width, depth); if (b == None) {
+          return None
+        } else b.get
+      }
       case _ => List()
     }
     if (ports.length == 0) {
@@ -128,10 +132,135 @@ object SRAMMacro {
       return None
     }
     val extraPorts: Seq[MacroExtraPort] = json.get("extra ports") match {
-      case Some(x:JsArray) => x.as[List[Map[String, JsValue]]] map { a => { val b = MacroExtraPort.parseJSON(a); if (b == None) { return None } else b.get } }
+      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a =>
+        val b = MacroExtraPort.parseJSON(a); if (b == None) {
+          return None
+        } else b.get
+      }
       case _ => List()
     }
     Some(SRAMMacro(name, width, depth, family, ports, extraPorts))
+  }
+}
+
+// SRAM compiler
+case class SRAMGroup(
+  name: Seq[String],
+  family: String,
+  vt: Seq[String],
+  mux: Int,
+  depth: Range,
+  width: Range,
+  ports: Seq[MacroPort],
+  extraPorts: Seq[MacroExtraPort] = List()
+) {
+  def toJSON: JsObject = {
+    val output = new ListBuffer[(String, JsValue)]()
+    output.appendAll(Seq(
+      "name" -> JsArray(name.map(Json.toJson(_))),
+      "vt" -> JsArray(vt.map(Json.toJson(_))),
+      "mux" -> Json.toJson(mux),
+      "depth" -> JsArray(Seq(depth.start, depth.end, depth.step).map{x =>Json.toJson(x)}),
+      "width" -> JsArray(Seq(width.start, width.end, width.step).map{x =>Json.toJson(x)}),
+      "ports" -> JsArray(ports map { _.toJSON })
+    ))
+    if (family != "") {
+      output.appendAll(Seq("family" -> Json.toJson(family)))
+    }
+    if (extraPorts.length > 0) {
+      output.appendAll(Seq("extra ports" -> JsArray(extraPorts map { _.toJSON })))
+    }
+    JsObject(output)
+  }
+}
+object SRAMGroup {
+  def parseJSON(json: Map[String, JsValue]): Option[SRAMGroup] = {
+    val family: String = json.get("family") match {
+      case Some(x: JsString) => x.as[String]
+      case _ => "" // optional
+    }
+    val name: Seq[String] = json.get("name") match {
+      case Some(x: JsArray) => x.as[List[JsString]].map(_.as[String])
+      case _ => return None
+    }
+    val vt: Seq[String] = json.get("vt") match {
+      case Some(x: JsArray) => x.as[List[JsString]].map(_.as[String])
+      case _ => return None
+    }
+    val mux: Int = json.get("mux") match {
+      case Some(x: JsNumber) => x.value.intValue
+      case _ => return None
+    }
+    val depth: Range = json.get("depth") match {
+      case Some(x: JsArray) =>
+        val seq = x.as[List[JsNumber]].map(_.value.intValue)
+        Range(seq(0), seq(1), seq(2))
+      case _ => return None
+    }
+    val width: Range = json.get("width") match {
+      case Some(x: JsArray) =>
+        val seq = x.as[List[JsNumber]].map(_.value.intValue)
+        Range(seq(0), seq(1), seq(2))
+      case _ => return None
+    }
+    val ports: Seq[MacroPort] = json.get("ports") match {
+      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a => {
+        val b = MacroPort.parseJSON(a, None, None); if (b == None) {
+          return None
+        } else b.get
+      }
+      }
+      case _ => List()
+    }
+    if (ports.length == 0) {
+      // Can't have portless memories.
+      return None
+    }
+    val extraPorts: Seq[MacroExtraPort] = json.get("extra ports") match {
+      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a => {
+        val b = MacroExtraPort.parseJSON(a); if (b == None) {
+          return None
+        } else b.get
+      }
+      }
+      case _ => List()
+    }
+    Some(SRAMGroup(name, family, vt, mux, depth, width, ports, extraPorts))
+  }
+}
+
+case class SRAMCompiler(
+  name: String,
+  groups: Seq[SRAMGroup]
+) extends Macro {
+  override def toJSON(): JsObject = {
+    val output = new ListBuffer[(String, JsValue)]()
+    output.appendAll(Seq(
+      "type" -> Json.toJson("sramcompiler"),
+      "name" -> Json.toJson(name),
+      "groups" -> JsArray(groups map { _.toJSON })
+    ))
+
+    JsObject(output)
+  }
+
+  override def typeStr = "sram"
+}
+object SRAMCompiler {
+  def parseJSON(json:Map[String, JsValue]): Option[SRAMCompiler] = {
+    val name: String = json.get("name") match {
+      case Some(x:JsString) => x.as[String]
+      case _ => return None
+    }
+    val groups: Seq[SRAMGroup] = json.get("groups") match {
+      case Some(x:JsArray) => x.as[List[Map[String, JsValue]]] map { a => { val b = SRAMGroup.parseJSON(a); if (b == None) { return None } else b.get } }
+      case _ => List()
+    }
+    if (groups.length == 0) {
+      // Can't have portless memories.
+      return None
+    }
+    Some(SRAMCompiler(name, groups))
   }
 }
 
@@ -242,10 +371,10 @@ case class MacroPort(
   maskGran: Option[Int] = None,
 
   // For internal use only; these aren't port-specific.
-  width: Int,
-  depth: Int
+  width: Option[Int],
+  depth: Option[Int]
   ) {
-  val effectiveMaskGran = maskGran.getOrElse(width)
+  def effectiveMaskGran = maskGran.getOrElse(width.get)
 
   def toJSON(): JsObject = {
     val keys: Seq[Tuple2[String, Option[Any]]] = Seq(
@@ -276,7 +405,9 @@ case class MacroPort(
   assert (polarizedPorts.distinct.size == polarizedPorts.size, "All port names must be unique")
 }
 object MacroPort {
-  def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = {
+  def parseJSON(json:Map[String, JsValue]): Option[MacroPort] = parseJSON(json, None, None)
+  def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = parseJSON(json, Some(width), Some(depth))
+  def parseJSON(json:Map[String, JsValue], width:Option[Int], depth:Option[Int]): Option[MacroPort] = {
     val address = PolarizedPort.parseJSON(json, "address")
     val clock = PolarizedPort.parseJSON(json, "clock")
     if (address == None || clock == None) {
@@ -359,6 +490,7 @@ object Utils {
           objTypeStr match {
             case "filler cell" | "metal filler cell" => FillerMacroBase.parseJSON(obj)
             case "sram" => SRAMMacro.parseJSON(obj)
+            case "sramcompiler" => SRAMCompiler.parseJSON(obj)
             case _ => None // skip unknown macro types
           }
         }
@@ -462,7 +594,7 @@ object ConfReader {
       maskPort=if (masked) Some(PolarizedPort(s"${prefix}_${w}mask", ActiveHigh)) else None,
       maskGran=if (masked) maskGran else None,
 
-      width=width, depth=depth
+      width=Some(width), depth=Some(depth)
     )
   }
 
