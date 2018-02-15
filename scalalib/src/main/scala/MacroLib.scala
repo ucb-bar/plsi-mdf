@@ -194,13 +194,13 @@ object SRAMGroup {
     val depth: Range = json.get("depth") match {
       case Some(x: JsArray) =>
         val seq = x.as[List[JsNumber]].map(_.value.intValue)
-        Range(seq(0), seq(1), seq(2))
+        Range.inclusive(seq(0), seq(1), seq(2))
       case _ => return None
     }
     val width: Range = json.get("width") match {
       case Some(x: JsArray) =>
         val seq = x.as[List[JsNumber]].map(_.value.intValue)
-        Range(seq(0), seq(1), seq(2))
+        Range.inclusive(seq(0), seq(1), seq(2))
       case _ => return None
     }
     val ports: Seq[MacroPort] = json.get("ports") match {
