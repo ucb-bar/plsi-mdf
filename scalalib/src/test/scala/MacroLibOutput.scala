@@ -30,7 +30,7 @@ trait HasAwesomeMemData {
         maskPort=Some(PolarizedPort(name="mask", polarity=ActiveHigh)),
         maskGran=Some(8),
 
-        width=32, depth=1024 // These numbers don't matter.
+        width=Some(32), depth=Some(1024) // These numbers don't matter.
       )),
       extraPorts=List()
     )
@@ -134,7 +134,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
 
       input=Some(PolarizedPort(name="data_in", polarity=ActiveHigh)),
 
-      width=32, depth=1024 // These numbers don't matter.
+      width=Some(32), depth=Some(1024) // These numbers don't matter.
     )
     val expected = """
     | {
@@ -158,7 +158,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
 
       output=Some(PolarizedPort(name="data_out", polarity=ActiveHigh)),
 
-      width=32, depth=1024 // These numbers don't matter.
+      width=Some(32), depth=Some(1024) // These numbers don't matter.
     )
     val expected = """
     | {
@@ -183,7 +183,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
       maskPort=Some(PolarizedPort(name="mask", polarity=ActiveHigh)),
       maskGran=Some(8),
 
-      width=32, depth=1024 // These numbers don't matter.
+      width=Some(32), depth=Some(1024) // These numbers don't matter.
     )
     val expected = """
     | {
@@ -216,7 +216,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
       maskPort=Some(PolarizedPort(name="mask", polarity=ActiveHigh)),
       maskGran=Some(8),
 
-      width=32, depth=1024 // These numbers don't matter.
+      width=Some(32), depth=Some(1024) // These numbers don't matter.
     )
     val expected = """
     | {
