@@ -244,7 +244,7 @@ case class SRAMCompiler(
     JsObject(output)
   }
 
-  override def typeStr = "sram"
+  override def typeStr = "sramcompiler"
 }
 object SRAMCompiler {
   def parseJSON(json:Map[String, JsValue]): Option[SRAMCompiler] = {
