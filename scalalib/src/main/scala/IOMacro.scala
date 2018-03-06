@@ -35,7 +35,7 @@ case class IOMacro(
                       terminationType: Option[TerminationType] = None,
                       terminationReference: Option[String] = None,
                       matching: Seq[String] = Seq.empty[String]
-                    ) extends Macro {
+                  ) extends Macro {
   override def toJSON(): JsObject = {
 
     val output = new ListBuffer[(String, JsValue)]()
@@ -98,3 +98,40 @@ object IOMacro {
   }
 }
 
+case class IOProperties(name: String, top: String, ios: Seq[IOMacro]) extends Macro {
+  override def toJSON(): JsObject = {
+    val output = new ListBuffer[(String, JsValue)]()
+    output.appendAll(Seq(
+      "name" -> Json.toJson(name),
+      "top" -> Json.toJson(top),
+      "type" -> Json.toJson(typeStr),
+      "ios" -> JsArray(ios.map(_.toJSON))
+    ))
+    JsObject(output)
+  }
+
+  override def typeStr = "io_properties"
+
+}
+
+object IOProperties {
+  def parseJSON(json: Map[String, JsValue]): Option[IOProperties] = {
+    val name: String = json.get("name") match {
+      case Some(x: JsString) => x.as[String]
+      case _ => return None
+    }
+    val top: String = json.get("top") match {
+      case Some(x: JsString) => x.as[String]
+      case _ => return None
+    }
+    val ios: Seq[IOMacro] = json.get("ios") match {
+      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a =>
+        val b = IOMacro.parseJSON(a); if (b == None) {
+        return None
+      } else b.get
+      }
+      case _ => List()
+    }
+    Some(IOProperties(name, top, ios))
+  }
+}

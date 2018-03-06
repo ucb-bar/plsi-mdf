@@ -6,12 +6,13 @@ import org.scalatest.Matchers
 import scala.io.Source
 
 
-class FlipChipMacroSpec extends FlatSpec with Matchers {
-  "Parsing flipchipmacros" should "work" in {
-    val stream = getClass.getResourceAsStream("/bumps.json")
+class IOPropertiesSpec extends FlatSpec with Matchers {
+  "Parsing io_properties" should "work" in {
+    val stream = getClass.getResourceAsStream("/io_properties.json")
     val mdf = Utils.readMDFFromString(scala.io.Source.fromInputStream(stream).getLines().mkString("\n"))
     mdf match {
-      case Some(Seq(fcp: FlipChipMacro)) => println(fcp.visualize)
+      case Some(Seq(fcp: IOProperties)) =>
     }
   }
 }
+

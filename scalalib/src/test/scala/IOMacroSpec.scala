@@ -5,24 +5,6 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 
 class IOMacroSpec extends FlatSpec with Matchers {
-  "Removed IOs" should "be detected" in {
-    val json =
-      """{
-         |  "name" : "",
-         |  "type" : "removed"
-         |}""".stripMargin
-    val m = JSONUtils.readStringValueMap(json).get
-    IOMacro.parseJSON(m) shouldBe Some(IOMacro("", Removed))
-  }
-  "Not connected IOs" should "be detected" in {
-    val json =
-      """{
-        |  "name" : "NC",
-        |  "type" : "NC"
-        |}""".stripMargin
-    val m = JSONUtils.readStringValueMap(json).get
-    IOMacro.parseJSON(m) shouldBe Some(IOMacro("NC", NoConnect))
-  }
   "Ground IOs" should "be detected" in {
     val json =
       """{

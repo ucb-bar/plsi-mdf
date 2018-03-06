@@ -20,6 +20,7 @@ object Utils {
             case "filler cell" | "metal filler cell" => FillerMacroBase.parseJSON(obj)
             case "sram" => SRAMMacro.parseJSON(obj)
             case "sramcompiler" => SRAMCompiler.parseJSON(obj)
+            case "io_properties" => IOProperties.parseJSON(obj)
             case "flipchip" => FlipChipMacro.parseJSON(obj)
             case _ => None // skip unknown macro types
           }

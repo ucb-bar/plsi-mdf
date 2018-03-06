@@ -7,7 +7,6 @@ import scala.language.implicitConversions
 // Flip Chip Macro
 case class FlipChipMacro(
                     name: String,
-                    ioProperties: Seq[IOMacro],
                     bumpDimensions: (Int, Int),
                     bumpLocations: Seq[Seq[String]]
                   ) extends Macro {
@@ -18,13 +17,12 @@ case class FlipChipMacro(
       "name" -> Json.toJson(name),
       "type" -> Json.toJson(typeStr),
       "bump_dimensions" -> JsArray(Seq(bumpDimensions._1, bumpDimensions._2).map{JsNumber(_)}),
-      "bump_locations" -> JsArray(bumpLocations.map(l => JsArray(l.map(JsString)))),
-      "io_properties" -> JsArray(ioProperties.map(_.toJSON))
+      "bump_locations" -> JsArray(bumpLocations.map(l => JsArray(l.map(JsString))))
     ))
 
     JsObject(output)
   }
-  val maxIONameSize = ioProperties.foldLeft(0){(size, io) => scala.math.max(size, io.name.length)}
+  val maxIONameSize = bumpLocations.foldLeft(0){(size, row) => row.foldLeft(size) {(size, str) => scala.math.max(size, str.length)}}
   def visualize: String = {
     val output = new StringBuffer()
     for(x <- 0 until bumpDimensions._1) {
@@ -49,16 +47,6 @@ object FlipChipMacro {
       case Some(x: JsString) => x.as[String]
       case _ => return None
     }
-    val ioProperties: Seq[IOMacro] = json.get("io_properties") match {
-      case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a =>
-        val b = IOMacro.parseJSON(a); if (b == None) {
-        return None
-      } else b.get
-      }
-      case _ => List()
-    }
-    // Can't have io-less chips
-    if (ioProperties.isEmpty) return None
 
     val bumpDimensions: (Int, Int) = json.get("bump_dimensions") match {
       case Some(JsArray(x)) if x.size == 2 =>
@@ -75,7 +63,7 @@ object FlipChipMacro {
     if(bumpLocations.size != bumpDimensions._1) return None
     if(bumpLocations.collect{case x if x.size != bumpDimensions._2 => x}.nonEmpty) return None
 
-    Some(FlipChipMacro(name, ioProperties, bumpDimensions, bumpLocations))
+    Some(FlipChipMacro(name, bumpDimensions, bumpLocations))
   }
 }
 
