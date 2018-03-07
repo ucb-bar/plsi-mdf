@@ -10,7 +10,6 @@ case object Digital extends PortType { override def toString: String = "digital"
 case object Analog extends PortType { override def toString: String = "analog" }
 case object Power extends PortType { override def toString: String = "power" }
 case object Ground extends PortType { override def toString: String = "ground" }
-case object Removed extends PortType { override def toString: String = "removed" }
 case object NoConnect extends PortType { override def toString: String = "NC" }
 
 sealed abstract class Direction { def toJSON(): JsString = JsString(toString) }
@@ -34,7 +33,8 @@ case class IOMacro(
                       termination: Option[Termination] = None,
                       terminationType: Option[TerminationType] = None,
                       terminationReference: Option[String] = None,
-                      matching: Seq[String] = Seq.empty[String]
+                      matching: Seq[String] = Seq.empty[String],
+                      bbname: Option[String] = None
                   ) extends Macro {
   override def toJSON(): JsObject = {
 
@@ -48,6 +48,7 @@ case class IOMacro(
     if (terminationType.isDefined) output.append("terminationType" -> terminationType.get.toJSON)
     if (terminationReference.isDefined) output.append("terminationReference" -> JsString(terminationReference.get))
     if (matching.nonEmpty) output.append("match" -> JsArray(matching.map(JsString)))
+    if (bbname.nonEmpty) output.append("blackBox" -> JsString(bbname.get))
 
     JsObject(output)
   }
@@ -64,7 +65,6 @@ object IOMacro {
       case Some(JsString("power")) => Power
       case Some(JsString("ground")) => Ground
       case Some(JsString("digital")) => Digital
-      case Some(JsString("removed")) => Removed
       case Some(JsString("analog")) => Analog
       case Some(JsString("NC")) => NoConnect
       case _ => return None
@@ -80,12 +80,12 @@ object IOMacro {
       case Some(JsString("CMOS")) => Some(CMOS)
       case _ => None
     }
-    val terminationType: Option[TerminationType] = json.get("termination_type") match {
+    val terminationType: Option[TerminationType] = json.get("terminationType") match {
       case Some(JsString("differential")) => Some(Differential)
       case Some(JsString("single")) => Some(Single)
       case _ => None
     }
-    val terminationRef: Option[String] = json.get("termination_reference") match {
+    val terminationRef: Option[String] = json.get("terminationReference") match {
       case Some(JsString(x)) => Some(x)
       case _ if terminationType.isDefined => return None
       case _ => None
@@ -94,7 +94,12 @@ object IOMacro {
       case Some(JsArray(array)) => array.map(_.as[JsString].value).toList
       case _ => Seq.empty[String]
     }
-    Some(IOMacro(name, tpe, direction, termination, terminationType, terminationRef, matching))
+    val bbname: Option[String] = json.get("blackBox") match {
+      case Some(JsString(module)) => Some(module)
+      case Some(_) => return None
+      case _ => None
+    }
+    Some(IOMacro(name, tpe, direction, termination, terminationType, terminationRef, matching, bbname))
   }
 }
 
