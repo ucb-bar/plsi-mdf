@@ -291,7 +291,7 @@ object PolarizedPort {
 // A SRAM memory port
 case class MacroPort(
                       address: PolarizedPort,
-                      clock: PolarizedPort,
+                      clock: Option[PolarizedPort] = None,
 
                       writeEnable: Option[PolarizedPort] = None,
                       readEnable: Option[PolarizedPort] = None,
@@ -312,7 +312,7 @@ case class MacroPort(
   def toJSON(): JsObject = {
     val keys: Seq[Tuple2[String, Option[Any]]] = Seq(
       "address" -> Some(address),
-      "clock" -> Some(clock),
+      "clock" -> clock,
       "write enable" -> writeEnable,
       "read enable" -> readEnable,
       "chip enable" -> chipEnable,
@@ -334,7 +334,7 @@ case class MacroPort(
   }
 
   // Check that all port names are unique.
-  private val polarizedPorts = List(Some(address), Some(clock), writeEnable, readEnable, chipEnable, output, input, maskPort).flatten
+  private val polarizedPorts = List(Some(address), clock, writeEnable, readEnable, chipEnable, output, input, maskPort).flatten
   assert (polarizedPorts.distinct.size == polarizedPorts.size, "All port names must be unique")
 }
 object MacroPort {
@@ -342,11 +342,11 @@ object MacroPort {
   def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = parseJSON(json, Some(width), Some(depth))
   def parseJSON(json:Map[String, JsValue], width:Option[Int], depth:Option[Int]): Option[MacroPort] = {
     val address = PolarizedPort.parseJSON(json, "address")
-    val clock = PolarizedPort.parseJSON(json, "clock")
-    if (address == None || clock == None) {
+    if (address == None) {
       return None
     }
 
+    val clock = PolarizedPort.parseJSON(json, "clock")
     // TODO: validate based on family (e.g. 1rw must have a write enable, etc)
     val writeEnable = PolarizedPort.parseJSON(json, "write enable")
     val readEnable = PolarizedPort.parseJSON(json, "read enable")
@@ -367,7 +367,7 @@ object MacroPort {
 
     Some(MacroPort(width=width, depth=depth,
       address=address.get,
-      clock=clock.get,
+      clock=clock,
 
       writeEnable=writeEnable,
       readEnable=readEnable,

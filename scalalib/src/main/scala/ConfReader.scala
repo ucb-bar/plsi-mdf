@@ -29,7 +29,7 @@ object ConfReader {
     val w = if (isReadWriter) "w" else ""
     MacroPort(
       address=PolarizedPort(s"${prefix}_addr", ActiveHigh),
-      clock=PolarizedPort(s"${prefix}_clk", PositiveEdge),
+      clock=Some(PolarizedPort(s"${prefix}_clk", PositiveEdge)),
 
       writeEnable=if (isReadWriter) Some(PolarizedPort(s"${prefix}_${w}mode", ActiveHigh)) else None,
 
