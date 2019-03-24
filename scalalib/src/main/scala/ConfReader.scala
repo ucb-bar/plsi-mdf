@@ -65,6 +65,7 @@ object ConfReader {
           width=width,
           depth=depth,
           family=familyStr,
+          vt="",mux=1,
           ports=firrtlPorts map (generateFirrtlPort(_, width, depth, maskGran)),
           extraPorts=List()
         ))

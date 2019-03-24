@@ -10,6 +10,8 @@ case class SRAMMacro(
                       width: Int,
                       depth: Int,
                       family: String,
+                      vt: String,
+                      mux: Int,
                       ports: Seq[MacroPort],
                       extraPorts: Seq[MacroExtraPort] = List()
                     ) extends Macro {
@@ -20,10 +22,15 @@ case class SRAMMacro(
       "name" -> Json.toJson(name),
       "width" -> Json.toJson(width),
       "depth" -> Json.toJson(depth),
+      "mux" -> Json.toJson(mux),
+      "mask" -> Json.toJson(ports.exists(p => p.maskPort.isDefined)),
       "ports" -> JsArray(ports map { _.toJSON })
     ))
     if (family != "") {
       output.appendAll(Seq("family" -> Json.toJson(family)))
+    }
+    if (vt != "") {
+      output.appendAll(Seq("vt" -> Json.toJson(vt)))
     }
     if (extraPorts.length > 0) {
       output.appendAll(Seq("extra ports" -> JsArray(extraPorts map { _.toJSON })))
@@ -52,6 +59,14 @@ object SRAMMacro {
       case Some(x: JsString) => x.as[String]
       case _ => "" // optional
     }
+    val vt: String = json.get("vt") match {
+      case Some(x: JsString) => x.as[String]
+      case _ => "" // optional
+    }
+    val mux: Int = json.get("mux") match {
+      case Some(x: JsNumber) => x.value.intValue
+      case _ => 1 // default
+    }
     val ports: Seq[MacroPort] = json.get("ports") match {
       case Some(x: JsArray) => x.as[List[Map[String, JsValue]]] map { a =>
         val b = MacroPort.parseJSON(a, width, depth); if (b == None) {
@@ -72,7 +87,7 @@ object SRAMMacro {
       }
       case _ => List()
     }
-    Some(SRAMMacro(name, width, depth, family, ports, extraPorts))
+    Some(SRAMMacro(name, width, depth, family, vt, mux, ports, extraPorts))
   }
 }
 
