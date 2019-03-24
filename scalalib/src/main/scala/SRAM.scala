@@ -10,9 +10,9 @@ case class SRAMMacro(
                       width: Int,
                       depth: Int,
                       family: String,
-                      vt: String,
-                      mux: Int,
                       ports: Seq[MacroPort],
+                      vt: String = "",
+                      mux: Int = 1,
                       extraPorts: Seq[MacroExtraPort] = List()
                     ) extends Macro {
   override def toJSON(): JsObject = {
@@ -87,7 +87,7 @@ object SRAMMacro {
       }
       case _ => List()
     }
-    Some(SRAMMacro(name, width, depth, family, vt, mux, ports, extraPorts))
+    Some(SRAMMacro(name, width, depth, family, ports, vt, mux, extraPorts))
   }
 }
 
