@@ -52,7 +52,7 @@ object SRAMMacro {
       case _ => return None
     }
     val depth: BigInt = json.get("depth") match {
-      case Some(x: JsNumber) => BigInt(x.as[String])
+      case Some(x: JsString) => BigInt(x.as[String])
       case _ => return None
     }
     val family: String = json.get("family") match {
