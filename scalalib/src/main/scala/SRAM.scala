@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 case class SRAMMacro(
                       name: String,
                       width: Int,
-                      depth: Int,
+                      depth: BigInt,
                       family: String,
                       ports: Seq[MacroPort],
                       vt: String = "",
@@ -21,7 +21,7 @@ case class SRAMMacro(
       "type" -> JsString("sram"),
       "name" -> Json.toJson(name),
       "width" -> Json.toJson(width),
-      "depth" -> Json.toJson(depth),
+      "depth" -> Json.toJson(depth.toString),
       "mux" -> Json.toJson(mux),
       "mask" -> Json.toJson(ports.exists(p => p.maskPort.isDefined)),
       "ports" -> JsArray(ports map { _.toJSON })
@@ -51,8 +51,8 @@ object SRAMMacro {
       case Some(x: JsNumber) => x.value.intValue
       case _ => return None
     }
-    val depth: Int = json.get("depth") match {
-      case Some(x: JsNumber) => x.value.intValue
+    val depth: BigInt = json.get("depth") match {
+      case Some(x: JsString) => BigInt(x.as[String])
       case _ => return None
     }
     val family: String = json.get("family") match {
@@ -320,7 +320,7 @@ case class MacroPort(
 
                       // For internal use only; these aren't port-specific.
                       width: Option[Int],
-                      depth: Option[Int]
+                      depth: Option[BigInt]
                     ) {
   def effectiveMaskGran = maskGran.getOrElse(width.get)
 
@@ -354,8 +354,8 @@ case class MacroPort(
 }
 object MacroPort {
   def parseJSON(json:Map[String, JsValue]): Option[MacroPort] = parseJSON(json, None, None)
-  def parseJSON(json:Map[String, JsValue], width:Int, depth:Int): Option[MacroPort] = parseJSON(json, Some(width), Some(depth))
-  def parseJSON(json:Map[String, JsValue], width:Option[Int], depth:Option[Int]): Option[MacroPort] = {
+  def parseJSON(json:Map[String, JsValue], width:Int, depth:BigInt): Option[MacroPort] = parseJSON(json, Some(width), Some(depth))
+  def parseJSON(json:Map[String, JsValue], width:Option[Int], depth:Option[BigInt]): Option[MacroPort] = {
     val address = PolarizedPort.parseJSON(json, "address")
     if (address == None) {
       return None
