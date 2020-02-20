@@ -9,7 +9,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
   def generateReadPort(num: Int, width: Int, depth: Int): MacroPort = {
     MacroPort(
       address=PolarizedPort(s"R${num}_addr", ActiveHigh),
-      clock=PolarizedPort(s"R${num}_clk", PositiveEdge),
+      clock=Some(PolarizedPort(s"R${num}_clk", PositiveEdge)),
 
       output=Some(PolarizedPort(s"R${num}_data", ActiveHigh)),
 
@@ -21,7 +21,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
   def generateWritePort(num: Int, width: Int, depth: Int, maskGran: Option[Int] = None): MacroPort = {
     MacroPort(
       address=PolarizedPort(s"W${num}_addr", ActiveHigh),
-      clock=PolarizedPort(s"W${num}_clk", PositiveEdge),
+      clock=Some(PolarizedPort(s"W${num}_clk", PositiveEdge)),
 
       input=Some(PolarizedPort(s"W${num}_data", ActiveHigh)),
 
@@ -41,7 +41,7 @@ class ConfReaderSpec extends FlatSpec with Matchers {
       ports=List(
         MacroPort(
           address=PolarizedPort("RW0_addr", ActiveHigh),
-          clock=PolarizedPort("RW0_clk", PositiveEdge),
+          clock=Some(PolarizedPort("RW0_clk", PositiveEdge)),
 
           writeEnable=Some(PolarizedPort("RW0_wmode", ActiveHigh)),
 

@@ -18,7 +18,7 @@ trait HasAwesomeMemData {
       family="1rw",
       ports=Seq(MacroPort(
         address=PolarizedPort(name="addr", polarity=ActiveHigh),
-        clock=PolarizedPort(name="clk", polarity=PositiveEdge),
+        clock=Some(PolarizedPort(name="clk", polarity=PositiveEdge)),
 
         writeEnable=Some(PolarizedPort(name="write_enable", polarity=ActiveHigh)),
         readEnable=Some(PolarizedPort(name="read_enable", polarity=ActiveHigh)),
@@ -42,7 +42,9 @@ trait HasAwesomeMemData {
     |   "type": "sram",
     |   "name": "awesome_mem",
     |   "width": 32,
-    |   "depth": 1024,
+    |   "depth": "1024",
+    |   "mux": 1,
+    |   "mask":true,
     |   "family": "1rw",
     |   "ports": [
     | {
@@ -128,7 +130,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
   "Minimal write port" should "be generated" in {
     val m = MacroPort(
       address=PolarizedPort(name="addr", polarity=ActiveHigh),
-      clock=PolarizedPort(name="clk", polarity=PositiveEdge),
+      clock=Some(PolarizedPort(name="clk", polarity=PositiveEdge)),
 
       writeEnable=Some(PolarizedPort(name="write_enable", polarity=ActiveHigh)),
 
@@ -154,7 +156,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
   "Minimal read port" should "be generated" in {
     val m = MacroPort(
       address=PolarizedPort(name="addr", polarity=ActiveHigh),
-      clock=PolarizedPort(name="clk", polarity=PositiveEdge),
+      clock=Some(PolarizedPort(name="clk", polarity=PositiveEdge)),
 
       output=Some(PolarizedPort(name="data_out", polarity=ActiveHigh)),
 
@@ -176,7 +178,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
   "Masked read port" should "be generated" in {
     val m = MacroPort(
       address=PolarizedPort(name="addr", polarity=ActiveHigh),
-      clock=PolarizedPort(name="clk", polarity=PositiveEdge),
+      clock=Some(PolarizedPort(name="clk", polarity=PositiveEdge)),
 
       output=Some(PolarizedPort(name="data_out", polarity=ActiveHigh)),
 
@@ -204,7 +206,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
   "Everything port" should "be generated" in {
     val m = MacroPort(
       address=PolarizedPort(name="addr", polarity=ActiveHigh),
-      clock=PolarizedPort(name="clk", polarity=PositiveEdge),
+      clock=Some(PolarizedPort(name="clk", polarity=PositiveEdge)),
 
       writeEnable=Some(PolarizedPort(name="write_enable", polarity=ActiveHigh)),
       readEnable=Some(PolarizedPort(name="read_enable", polarity=ActiveHigh)),

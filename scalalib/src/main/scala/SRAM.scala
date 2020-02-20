@@ -52,7 +52,7 @@ object SRAMMacro {
       case _ => return None
     }
     val depth: BigInt = json.get("depth") match {
-      case Some(x: JsString) => BigInt(x.as[String])
+      case Some(x: JsString) => try { BigInt(x.as[String]) } catch { case _ => return None }
       case _ => return None
     }
     val family: String = json.get("family") match {
@@ -291,8 +291,6 @@ object PolarizedPort {
     }
     val polarity: Option[PortPolarity] = json.get(prefix + " port polarity") match {
       case Some(x:JsString) => Some(x.value)
-      // TODO: eliminate this hack once PLSI is fixed to always emit polarities
-      case None => Some(if (prefix == "clock") PositiveEdge else ActiveHigh)
       case _ => None
     }
 

@@ -41,8 +41,8 @@ class IOMacroSpec extends FlatSpec with Matchers {
         |    "type" : "digital",
         |    "direction" : "input",
         |    "termination" : 50,
-        |    "termination_type" : "single",
-        |    "termination_reference" : "GND"
+        |    "terminationType" : "single",
+        |    "terminationReference" : "GND"
         |}""".stripMargin
     val m = JSONUtils.readStringValueMap(json).get
     IOMacro.parseJSON(m) shouldBe Some(IOMacro("CCLK1", Digital, Some(Input), Some(Resistive(50)), Some(Single), Some("GND")))
@@ -55,8 +55,8 @@ class IOMacroSpec extends FlatSpec with Matchers {
         |    "direction" : "input",
         |    "match" : ["REFCLK0N"],
         |    "termination" : 100,
-        |    "termination_type" : "differential",
-        |    "termination_reference" : "GND"
+        |    "terminationType" : "differential",
+        |    "terminationReference" : "GND"
         |}""".stripMargin
     val m = JSONUtils.readStringValueMap(json).get
     IOMacro.parseJSON(m) shouldBe Some(IOMacro("REFCLK0P", Analog, Some(Input), Some(Resistive(100)), Some(Differential), Some("GND"), List("REFCLK0N")))

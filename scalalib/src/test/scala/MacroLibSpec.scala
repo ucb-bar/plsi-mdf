@@ -121,7 +121,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
     """
     val port = MacroPort(
       address=PolarizedPort(s"A_${postfix}", ActiveHigh),
-      clock=PolarizedPort(s"CLK_${postfix}", PositiveEdge),
+      clock=Some(PolarizedPort(s"CLK_${postfix}", PositiveEdge)),
 
       writeEnable=Some(PolarizedPort(s"WEN_${postfix}", ActiveHigh)),
       readEnable=Some(PolarizedPort(s"REN_${postfix}", ActiveHigh)),
@@ -163,7 +163,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 2048,
-  "depth": 4096,
+  "depth": "4096",
   "family": "1rw",
   "ports": [
     ${json}
@@ -186,7 +186,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 1234,
-  "depth": 8888,
+  "depth": "8888",
   "family": "1rw",
   "ports": [
     ${json}
@@ -206,7 +206,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
     val (json, port) = simplePort("_A", 64, 1024)
     val port2 = MacroPort(
       address=PolarizedPort("A_B", ActiveHigh),
-      clock=PolarizedPort("CLK_B", PositiveEdge),
+      clock=Some(PolarizedPort("CLK_B", PositiveEdge)),
       writeEnable=Some(PolarizedPort("WEN_B", ActiveHigh)),
       readEnable=None,
       chipEnable=None,
@@ -220,7 +220,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 64,
-  "depth": 1024,
+  "depth": "1024",
   "family": "2rw",
   "ports": [
     ${json},
@@ -255,7 +255,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "GOT_EXTRA",
   "width": 2048,
-  "depth": 4096,
+  "depth": "4096",
   "family": "1rw",
   "ports": [
     ${json}
@@ -302,7 +302,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 2048,
-  "depth": 4096,
+  "depth": "4096",
   "family": "1rw",
   "ports": [
     {
@@ -322,7 +322,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 2048,
-  "depth": 4096,
+  "depth": "4096",
   "family": "1rw"
 }
     """).get
@@ -336,7 +336,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "SRAMS_R_US",
   "width": 2048,
-  "depth": 4096
+  "depth": "4096"
 }
     """).get
     SRAMMacro.parseJSON(m) shouldBe None
@@ -349,7 +349,7 @@ class SRAMMacroSpec extends FlatSpec with Matchers {
   "type": "sram",
   "name": "BAD_BAD_SRAM",
   "width": "wide",
-  "depth": 4096
+  "depth": "4096"
 }
     """).get
     SRAMMacro.parseJSON(m) shouldBe None
