@@ -216,7 +216,7 @@ object SRAMCompiler {
 sealed abstract class MacroExtraPortType
 case object Constant extends MacroExtraPortType
 object MacroExtraPortType {
-  implicit def toMacroExtraPortType(s: Any): Some[MacroExtraPortType] = {
+  implicit def toMacroExtraPortType(s: Any): Option[MacroExtraPortType] = {
     s match {
       case "constant" => Some(Constant)
       case _ => None
