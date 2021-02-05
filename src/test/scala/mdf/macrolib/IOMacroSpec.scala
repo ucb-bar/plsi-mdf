@@ -44,7 +44,9 @@ class IOMacroSpec extends AnyFlatSpec with Matchers {
         |    "terminationReference" : "GND"
         |}""".stripMargin
     val m = JSONUtils.readStringValueMap(json).get
-    IOMacro.parseJSON(m) shouldBe Some(IOMacro("CCLK1", Digital, Some(Input), Some(Resistive(50)), Some(Single), Some("GND")))
+    IOMacro.parseJSON(m) shouldBe Some(
+      IOMacro("CCLK1", Digital, Some(Input), Some(Resistive(50)), Some(Single), Some("GND"))
+    )
   }
   "Digital IOs with matching and termination" should "be detected" in {
     val json =
@@ -58,7 +60,8 @@ class IOMacroSpec extends AnyFlatSpec with Matchers {
         |    "terminationReference" : "GND"
         |}""".stripMargin
     val m = JSONUtils.readStringValueMap(json).get
-    IOMacro.parseJSON(m) shouldBe Some(IOMacro("REFCLK0P", Analog, Some(Input), Some(Resistive(100)), Some(Differential), Some("GND"), List("REFCLK0N")))
+    IOMacro.parseJSON(m) shouldBe Some(
+      IOMacro("REFCLK0P", Analog, Some(Input), Some(Resistive(100)), Some(Differential), Some("GND"), List("REFCLK0N"))
+    )
   }
 }
-

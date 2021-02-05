@@ -3,7 +3,6 @@ package mdf.macrolib
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-
 class IOPropertiesSpec extends AnyFlatSpec with Matchers {
   "Parsing io_properties" should "work" in {
     val stream = getClass.getResourceAsStream("/io_properties.json")
@@ -13,4 +12,3 @@ class IOPropertiesSpec extends AnyFlatSpec with Matchers {
     }
   }
 }
-
