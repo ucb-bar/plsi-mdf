@@ -1,10 +1,10 @@
-package mdf.macrolib.test
+package mdf.macrolib
+
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import play.api.libs.json._
 
 import java.io.File
-import mdf.macrolib._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
-import play.api.libs.json._
 
 // Output tests (Scala -> JSON).
 // TODO: unify these tests with the input tests?
@@ -73,7 +73,7 @@ trait HasAwesomeMemData {
 }
 
 // Tests for filler macros.
-class FillerMacroOutput extends FlatSpec with Matchers {
+class FillerMacroOutput extends AnyFlatSpec with Matchers {
   "Valid lvt macro" should "be generated" in {
     val expected = """
     | {
@@ -108,7 +108,7 @@ class FillerMacroOutput extends FlatSpec with Matchers {
   }
 }
 
-class SRAMPortOutput extends FlatSpec with Matchers {
+class SRAMPortOutput extends AnyFlatSpec with Matchers {
   "Extra port" should "be generated" in {
     val m = MacroExtraPort(
       name="TIE_HIGH",
@@ -245,7 +245,7 @@ class SRAMPortOutput extends FlatSpec with Matchers {
   }
 }
 
-class SRAMMacroOutput extends FlatSpec with Matchers with HasAwesomeMemData {
+class SRAMMacroOutput extends AnyFlatSpec with Matchers with HasAwesomeMemData {
   "SRAM macro" should "be generated" in {
     val m = getAwesomeMem
     val expected = getAwesomeMemJSON
@@ -253,7 +253,7 @@ class SRAMMacroOutput extends FlatSpec with Matchers with HasAwesomeMemData {
   }
 }
 
-class InputOutput extends FlatSpec with Matchers with HasAwesomeMemData {
+class InputOutput extends AnyFlatSpec with Matchers with HasAwesomeMemData {
   "Read-write string" should "preserve data" in {
     val mdf = List(
       FillerMacro("MY_FILLER_CELL", "lvt"),

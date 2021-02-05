@@ -1,10 +1,9 @@
-package mdf.macrolib.test
+package mdf.macrolib
 
-import mdf.macrolib._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConfReaderSpec extends FlatSpec with Matchers {
+class ConfReaderSpec extends AnyFlatSpec with Matchers {
   /** Generate a read port in accordance with RenameAnnotatedMemoryPorts. */
   def generateReadPort(num: Int, width: Int, depth: Int): MacroPort = {
     MacroPort(

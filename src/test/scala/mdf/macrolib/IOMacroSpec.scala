@@ -1,10 +1,9 @@
-package mdf.macrolib.test
+package mdf.macrolib
 
-import mdf.macrolib._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class IOMacroSpec extends FlatSpec with Matchers {
+class IOMacroSpec extends AnyFlatSpec with Matchers {
   "Ground IOs" should "be detected" in {
     val json =
       """{

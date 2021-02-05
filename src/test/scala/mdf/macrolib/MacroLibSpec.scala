@@ -1,8 +1,7 @@
-package mdf.macrolib.test
+package mdf.macrolib
 
-import mdf.macrolib._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json._
 
 object JSONUtils {
@@ -15,7 +14,7 @@ object JSONUtils {
 }
 
 // Tests for filler macros
-class FillerMacroSpec extends FlatSpec with Matchers {
+class FillerMacroSpec extends AnyFlatSpec with Matchers {
   "Valid lvt macros" should "be detected" in {
     val m = JSONUtils.readStringValueMap("""
     | {
@@ -93,7 +92,7 @@ class FillerMacroSpec extends FlatSpec with Matchers {
 }
 
 // Tests for SRAM type and associates.
-class SRAMMacroSpec extends FlatSpec with Matchers {
+class SRAMMacroSpec extends AnyFlatSpec with Matchers {
   // Simple port which can be reused in tests
   // Note: assume width=depth=simplePortConstant.
   val simplePortConstant = 1024
