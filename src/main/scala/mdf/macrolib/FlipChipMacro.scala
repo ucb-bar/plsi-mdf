@@ -6,31 +6,35 @@ import scala.language.implicitConversions
 
 // Flip Chip Macro
 case class FlipChipMacro(
-                    name: String,
-                    bumpDimensions: (Int, Int),
-                    bumpLocations: Seq[Seq[String]]
-                  ) extends Macro {
+  name:           String,
+  bumpDimensions: (Int, Int),
+  bumpLocations:  Seq[Seq[String]])
+    extends Macro {
   override def toJSON(): JsObject = {
 
     val output = new ListBuffer[(String, JsValue)]()
-    output.appendAll(Seq(
-      "name" -> Json.toJson(name),
-      "type" -> Json.toJson(typeStr),
-      "bump_dimensions" -> JsArray(Seq(bumpDimensions._1, bumpDimensions._2).map{JsNumber(_)}),
-      "bump_locations" -> JsArray(bumpLocations.map(l => JsArray(l.map(JsString))))
-    ))
+    output.appendAll(
+      Seq(
+        "name" -> Json.toJson(name),
+        "type" -> Json.toJson(typeStr),
+        "bump_dimensions" -> JsArray(Seq(bumpDimensions._1, bumpDimensions._2).map { JsNumber(_) }),
+        "bump_locations" -> JsArray(bumpLocations.map(l => JsArray(l.map(JsString))))
+      )
+    )
 
     JsObject(output)
   }
-  val maxIONameSize = bumpLocations.foldLeft(0){(size, row) => row.foldLeft(size) {(size, str) => scala.math.max(size, str.length)}}
+  val maxIONameSize = bumpLocations.foldLeft(0) { (size, row) =>
+    row.foldLeft(size) { (size, str) => scala.math.max(size, str.length) }
+  }
   def visualize: String = {
     val output = new StringBuffer()
-    for(x <- 0 until bumpDimensions._1) {
-      for(y <- 0 until bumpDimensions._2) {
+    for (x <- 0 until bumpDimensions._1) {
+      for (y <- 0 until bumpDimensions._2) {
         val name = bumpLocations(x)(y).drop(1).dropRight(1)
         val extra = maxIONameSize - name.length()
-        val leftSpace = " " * (extra/2)
-        val rightSpace = " " * (extra/2 + extra%2)
+        val leftSpace = " " * (extra / 2)
+        val rightSpace = " " * (extra / 2 + extra % 2)
         output.append(leftSpace + name + rightSpace + "|")
       }
       output.append("\n")
@@ -56,14 +60,13 @@ object FlipChipMacro {
     }
     val bumpLocations: Seq[Seq[String]] = json.get("bump_locations") match {
       case Some(JsArray(array)) =>
-        array.collect{case JsArray(a2) => a2.map(_.toString)}
+        array.collect { case JsArray(a2) => a2.map(_.toString) }
       case _ => return None
     }
     // Can't have dimensions and locations which don't match
-    if(bumpLocations.size != bumpDimensions._1) return None
-    if(bumpLocations.collect{case x if x.size != bumpDimensions._2 => x}.nonEmpty) return None
+    if (bumpLocations.size != bumpDimensions._1) return None
+    if (bumpLocations.collect { case x if x.size != bumpDimensions._2 => x }.nonEmpty) return None
 
     Some(FlipChipMacro(name, bumpDimensions, bumpLocations))
   }
 }
-

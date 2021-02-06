@@ -9,24 +9,24 @@ object Utils {
   def readMDFFromString(str: String): Option[Seq[Macro]] = {
     Json.parse(str) match {
       // Make sure that the document is a list.
-      case arr:JsArray => {
-        val result: List[Option[Macro]] = arr.as[List[Map[String, JsValue]]] map { obj =>
+      case arr: JsArray => {
+        val result: List[Option[Macro]] = arr.as[List[Map[String, JsValue]]].map { obj =>
           // Check the type of object.
           val objTypeStr: String = obj.get("type") match {
-            case Some(x:JsString) => x.as[String]
+            case Some(x: JsString) => x.as[String]
             case _ => return None // error, no type found
           }
           objTypeStr match {
             case "filler cell" | "metal filler cell" => FillerMacroBase.parseJSON(obj)
-            case "sram" => SRAMMacro.parseJSON(obj)
-            case "sramcompiler" => SRAMCompiler.parseJSON(obj)
-            case "io_properties" => IOProperties.parseJSON(obj)
-            case "flipchip" => FlipChipMacro.parseJSON(obj)
-            case _ => None // skip unknown macro types
+            case "sram"                              => SRAMMacro.parseJSON(obj)
+            case "sramcompiler"                      => SRAMCompiler.parseJSON(obj)
+            case "io_properties"                     => IOProperties.parseJSON(obj)
+            case "flipchip"                          => FlipChipMacro.parseJSON(obj)
+            case _                                   => None // skip unknown macro types
           }
         }
         // Remove all the Nones and convert back to Seq[Macro]
-        Some(result.filter { x => x != None } map { x => x.get })
+        Some(result.filter { x => x != None }.map { x => x.get })
       }
       case _ => None
     }
@@ -43,7 +43,7 @@ object Utils {
 
   // Write a MDF file to a String.
   def writeMDFToString(s: Seq[Macro]): String = {
-    Json.prettyPrint(JsArray(s map (_.toJSON)))
+    Json.prettyPrint(JsArray(s.map(_.toJSON)))
   }
 
   // Write a MDF file from a path.
@@ -85,4 +85,3 @@ object Utils {
     }
   }
 }
-
