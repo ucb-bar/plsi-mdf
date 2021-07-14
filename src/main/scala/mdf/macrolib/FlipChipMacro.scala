@@ -24,7 +24,7 @@ case class FlipChipMacro(
 
     JsObject(output)
   }
-  val maxIONameSize = bumpLocations.foldLeft(0) { (size, row) =>
+  val maxIONameSize: Int = bumpLocations.foldLeft(0) { (size, row) =>
     row.foldLeft(size) { (size, str) => scala.math.max(size, str.length) }
   }
   def visualize: String = {
@@ -39,7 +39,7 @@ case class FlipChipMacro(
       }
       output.append("\n")
     }
-    output.toString()
+    output.toString
   }
 
   override def typeStr = "flipchip"
@@ -54,13 +54,13 @@ object FlipChipMacro {
 
     val bumpDimensions: (Int, Int) = json.get("bump_dimensions") match {
       case Some(JsArray(x)) if x.size == 2 =>
-        val z = x.map(_.as[JsNumber].value.intValue())
+        val z = x.map(_.as[JsNumber].value.intValue)
         (z(0), z(1))
       case None => return None
     }
     val bumpLocations: Seq[Seq[String]] = json.get("bump_locations") match {
       case Some(JsArray(array)) =>
-        array.collect { case JsArray(a2) => a2.map(_.toString) }
+        array.collect { case JsArray(a2) => a2.map(_.toString).toSeq }.toSeq
       case _ => return None
     }
     // Can't have dimensions and locations which don't match
